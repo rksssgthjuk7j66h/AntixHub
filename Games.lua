@@ -2,7 +2,6 @@ local games = {
   "Arsenal",
   "Doors",
   "NaturalDisasterSurvival",
-  "TreasureHuntSimulator"
+  "TreasureHuntSimulator",
+  "RainbowFriends"
 }
-
-return games
