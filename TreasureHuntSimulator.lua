@@ -98,8 +98,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 
+local d = false
 while wait(.4) do
-    if OrionLib.Flags["AutoDig"].Value then
+    if OrionLib.Flags["AutoDig"].Value and not d then
         local Event = game.Players.LocalPlayer.Character:FindFirstChild("RemoteClick", true)
         if Event then
             local nearest = GetClosestChest()
@@ -119,8 +120,10 @@ while wait(.4) do
             local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(4, 10, -160))
             game.ReplicatedStorage.Events.AreaSell:FireServer()
-            wait(.35)
+		d = true
+            wait(.6)
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = oldPos
+			d = false
         end
     end
 end
