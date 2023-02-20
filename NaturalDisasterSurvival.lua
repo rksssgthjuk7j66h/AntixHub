@@ -1,5 +1,5 @@
 local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
-local Window = OrionLib:MakeWindow({Name = "Aero Hub", IntroText = "Aero Hub", HidePremium = true, SaveConfig = false})
+local Window = OrionLib:MakeWindow({Name = "Antix Hub", IntroText = "Antix Hub", HidePremium = true, SaveConfig = false})
 
 function Notify(text, title)
     OrionLib:MakeNotification({
