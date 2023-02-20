@@ -10,3 +10,6 @@ end
 if game.PlaceId == 6516141723 or game.PlaceId == 6839171747 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/rksssgthjuk7j66h/AntixHub/main/Doors.lua"))()
 end
+if game.PlaceId == 7991339063 or game.PlaceId == 8888615802 then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/rksssgthjuk7j66h/AntixHub/main/RainbowFriends.lua"))()
+end
