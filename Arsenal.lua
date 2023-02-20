@@ -41,7 +41,7 @@ local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shle
 local Window = OrionLib:MakeWindow({Name = "Antix Hub", IntroText = "Antix Hub", HidePremium = true, SaveConfig = false})
 
 OrionLib:MakeNotification({
-	Name = "Antix Hub Notif",
+	Name = "Antix Hub",
 	Content = "Make sure you are using your alt account!",
 	Image = "rbxassetid://4483345998",
 	Time = 5
@@ -82,10 +82,18 @@ CombatTab:AddToggle({
 })
 
 CombatTab:AddToggle({
-	Name = "Semi Wallbang",
+	Name = "Wallbang",
     Flag = "Wallbang",
 	Default = false,
-	Callback = function()end
+	Callback = function(a)
+        if not a or OrionLib.Flags["SilentType"].Value == "HitParter" then return end
+        OrionLib:MakeNotification({
+            Name = "Antix Hub",
+            Content = "Select HitParter for full Wallbang",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
 })
 
 CombatTab:AddToggle({
@@ -124,7 +132,15 @@ CombatTab:AddDropdown({
 	Default = "Random",
     Flag = "AimPart",
 	Options = {"Random", "Torso", "Head"},
-	Callback = function()end    
+	Callback = function()end
+})
+
+CombatTab:AddDropdown({
+	Name = "Silent Aim Type",
+	Default = "Spoofed",
+    Flag = "SilentType",
+	Options = {"Spoofed", "HitParter"},
+	Callback = function()end
 })
 
 local GunModsTab = Window:MakeTab({
@@ -434,6 +450,25 @@ function GetAimPart()
     end
 end
 
+function WallCheck(target)
+    if not game.Players.LocalPlayer.Character then return end
+    if OrionLib.Flags["Wallbang"].Value then return true end
+
+    local raycast = Ray.new(game.Players.LocalPlayer.Character.Head.Position, (target.Position - game.Players.LocalPlayer.Character.Head.Position).Unit * 300)
+    local close_part, position = workspace.FindPartOnRayWithIgnoreList(workspace, raycast, {game.Players.LocalPlayer.Character}, false, true)
+
+    if close_part then
+        local hum = close_part.Parent.FindFirstChildOfClass(close_part.Parent, "Humanoid")
+        
+        if hum and target and hum.Parent == target.Parent then
+            local pos, is_visible = workspace.CurrentCamera.WorldToScreenPoint(workspace.CurrentCamera, target.Position)
+            if is_visible then
+                return true
+            end
+        end
+    end
+end
+
 function HitPart(v, d)
     if v.Status.Team.Value == "Spectator" then
         return
@@ -708,13 +743,19 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local args = {...}
     local method = getnamecallmethod()
 
-    if tostring(method) == "FindPartOnRayWithIgnoreList" and OrionLib.Flags["SilentAim"].Value then
+    if tostring(method) == "FindPartOnRayWithIgnoreList" and OrionLib.Flags["SilentAim"].Value and not checkcaller() then
         local HitChance = OrionLib.Flags["HitChance"].Value
         if HitChance == 100 or HitChance >= math.random(1, 100) then
             local target = GetClosest()
             if target and target.Character then
-                args[1] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target.Character[GetAimPart()].Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-                return oldNamecall(self, unpack(args))
+                if OrionLib.Flags["SilentType"].Value == "Spoofed" then
+                    args[1] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target.Character[GetAimPart()].Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+                    return oldNamecall(self, unpack(args))
+                elseif OrionLib.Flags["SilentType"].Value == "HitParter" and WallCheck(target.Character.Head) then
+                    for _ = 1, 5 do
+                        HitPart(target, true)
+                    end
+                end
             end
         end
     end
@@ -748,7 +789,7 @@ oldIndex = hookmetamethod(game, "__index", function(self, method)
     if string.lower(tostring(method)) == "kick" then
         return wait(9e9)
     end
-    if tostring(method) == "Clips" and OrionLib.Flags["Wallbang"].Value then
+    if tostring(method) == "Clips" and workspace.FindFirstChild(workspace, "Map") and OrionLib.Flags["Wallbang"].Value then
         return workspace.Map
     end
 	if tostring(self) == "HumanoidRootPart" and tostring(method) == "CFrame" and OrionLib.Flags["Backstab"].Value then
